@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>StandoperosPR (Dark)</title>
+<style>
+:root{--bg:#0c0c0f;--surface:#16161c;--line:#2a2a33;--text:#f3f1ec;--muted:#a09fa8;--accent:#ffb020;--accent-ink:#1a1200;color-scheme:dark;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-behavior:smooth;scroll-padding-top:calc(70px + env(safe-area-inset-top,0px))}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Helvetica Neue",Arial,sans-serif;line-height:1.6}
+a{color:inherit;text-decoration:none}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:rgba(12,12,15,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav{max-width:1100px;margin:0 auto;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.logo{font-weight:800;letter-spacing:.08em;text-transform:uppercase}.logo b{color:var(--accent)}
+nav ul{list-style:none;display:flex;gap:22px;margin:0;padding:0;font-size:.9rem;color:var(--muted)}
+nav ul a:hover{color:var(--accent)}
+section{max-width:1100px;margin:0 auto;padding:64px 20px}
+h1,h2{font-family:Georgia,serif;margin:0 0 16px;line-height:1.1}
+h1{font-size:clamp(2.4rem,8vw,5rem);text-transform:uppercase;letter-spacing:.02em}
+h2{font-size:clamp(1.8rem,5vw,2.8rem)}
+.hero{text-align:center;padding-top:80px}
+.hero p{color:var(--muted);max-width:620px;margin:0 auto}
+.cities{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:28px}
+.cities span{border:1px solid var(--line);border-radius:99px;padding:4px 14px;font-size:.8rem;color:var(--muted)}
+.shows{display:grid;gap:12px}
+.show{display:flex;align-items:center;gap:20px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 20px;flex-wrap:wrap}
+.date{min-width:120px;color:var(--accent);font-weight:700;text-transform:uppercase;font-size:.9rem}
+.info{flex:1;min-width:180px}.info small{color:var(--muted);display:block}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;padding:10px 20px;font-weight:700;cursor:pointer;font-size:.9rem}
+.btn:hover{filter:brightness(1.1)}
+.about p{color:var(--muted);max-width:760px}
+.team{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:32px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px;text-align:center}
+.avatar{width:84px;height:84px;border-radius:50%;margin:0 auto 12px;background:linear-gradient(135deg,var(--accent),#c2410c);color:var(--accent-ink);display:grid;place-items:center;font-size:1.8rem;font-weight:800}
+.tombola{background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.tombola>p{color:var(--muted)}
+form{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+label{display:grid;gap:6px;font-size:.85rem;color:var(--muted)}
+.full{grid-column:1/-1}
+input,select,textarea{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:inherit}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+.check{display:flex;gap:10px;align-items:center}
+.contact{text-align:center;color:var(--muted)}
+.contact a{color:var(--accent)}
+footer{border-top:1px solid var(--line);padding:32px 20px;text-align:center;color:var(--muted);font-size:.8rem}
+footer ul{list-style:none;display:flex;gap:18px;justify-content:center;flex-wrap:wrap;padding:0;margin:0 0 12px}
+@media(max-width:600px){form{grid-template-columns:1fr}nav ul{gap:14px}}
+</style>
+</head>
+<body>
+<header><nav>
+<a class="logo" href="#inicio">Standoperos<b>PR</b></a>
+<ul><li><a href="#inicio">Inicio</a></li><li><a href="#taquillas">Taquillas</a></li><li><a href="#standoperos">Standoperos</a></li><li><a href="#auspiciadores">Auspiciadores</a></li></ul>
+</nav></header>
+
+<section class="hero" id="inicio">
+<p style="color:var(--accent);font-weight:700;letter-spacing:.2em">NEXT SHOWS</p>
+<h1>Standoperos<br>Chisteando</h1>
+<p>Risas en español para audiencias dentro y fuera de la isla.</p>
+<div class="cities"><span>Bayamón, PR</span><span>Houston, TX</span><span>Dallas, TX</span><span>Austin, TX</span><span>San Antonio, TX</span><span>New York, NY</span><span>Boston, MA</span><span>Chicago, IL</span><span>Atlanta, GA</span></div>
+</section>
+
+<section id="taquillas">
+<h2>Taquillas</h2>
+<div class="shows" id="shows"></div>
+</section>
+
+<section class="about" id="standoperos">
+<h2>Standoperos</h2>
+<p>Standoperos Chisteando une dos de los proyectos más exitosos de la comedia en Puerto Rico para llevar risas en español a audiencias dentro y fuera de la isla. En 2023 llevaron su show a Texas y Florida, expandiendo el alcance del stand-up puertorriqueño.</p>
+<p>Standoperos fue el show semanal más duradero en Puerto Rico, mientras que Chisteando revolucionó la escena con su enfoque en el crowd work, acumulando más de 100 funciones sold out.</p>
+<p>Juntos, ofrecen una propuesta auténtica, enérgica y comprometida con el talento local, conectando con públicos nuevos y variados.</p>
+<div class="team">
+<div class="card"><div class="avatar">EB</div>Erick Bonilla</div>
+<div class="card"><div class="avatar">TS</div>Titito Sánchez</div>
+<div class="card"><div class="avatar">ER</div>Ernesto Rolón</div>
+<div class="card"><div class="avatar">CS</div>Cristina Sánchez</div>
+</div>
+</section>
+
+<section id="auspiciadores">
+<div class="tombola">
+<div style="padding:36px 28px">
+<h2>La Tómbola Estelar</h2>
+<p style="color:var(--muted)">¡Déjanos tu tema! También puede ser un bochinche, consejo, badtrip, goodtrip, queja o venenito…</p>
+<h3 style="margin:24px 0 0">Escríbenos</h3>
+<form id="f">
+<label>Nombre Completo *<input name="n" required></label>
+<label>Entidad<input name="e"></label>
+<label>Teléfono *<input name="t" type="tel" required></label>
+<label>Posición<input name="p"></label>
+<label>Email *<input name="m" type="email" required></label>
+<label>Tipo de Solicitud *<select name="s" required><option value="">Selecciona</option><option>Enviar tema</option><option>Auspicio</option><option>Contratación</option><option>Otro</option></select></label>
+<label class="full">Mensaje *<textarea name="g" rows="4" required></textarea></label>
+<label class="full">Método de contacto preferido<select name="c"><option>Teléfono</option><option>Videollamada</option><option>Correo Electrónico</option></select></label>
+<label class="full check"><input type="checkbox" style="width:auto"> Autorizo recibir correos de seguimiento</label>
+<div class="full"><button class="btn" type="submit">Enviar</button></div>
+</form>
+</div>
+</div>
+</section>
+
+<section class="contact">
+<h2>Contáctanos</h2>
+<p><a href="mailto:standoperospr@gmail.com">standoperospr@gmail.com</a><br>San Juan, PR</p>
+</section>
+
+<footer>
+<ul><li><a href="#inicio">Inicio</a></li><li><a href="#standoperos">Acerca de Standoperos</a></li><li><a href="#auspiciadores">Escríbenos</a></li><li><a href="#auspiciadores">Auspiciadores</a></li><li>Privacy Policy</li></ul>
+© 2026 STANDOPEROS TODOS LOS DERECHOS RESERVADOS
+</footer>
+
+<script>
+var S=[["27 y 28 Nov","Bayamón","La Tómbola Estelar"],["2 Dic","Boston, MA","La Tómbola en Boston"],["3 Dic","New Jersey","La Tómbola en New Jersey"],["4 Dic","New York, NY","La Tómbola en New York"],["6 Dic","Chicago, IL","La Tómbola en Chicago"],["8 Dic","Atlanta, GA","La Tómbola en Atlanta"],["9 Dic","Philadelphia, PA","La Tómbola en Philly"],["11 y 12 Dic","Bayamón","Chisteando"],["18 y 19 Dic","Bayamón","La Tómbola Estelar"]];
+document.getElementById("shows").innerHTML=S.map(function(s){return '<div class="show"><div class="date">'+s[0]+'</div><div class="info"><strong>'+s[2]+'</strong><small>'+s[1]+'</small></div><button class="btn" type="button">Boletos</button></div>'}).join("");
+document.getElementById("f").addEventListener("submit",function(e){e.preventDefault();var d=new FormData(e.target);var b="Nombre: "+d.get("n")+"\nEntidad: "+d.get("e")+"\nTeléfono: "+d.get("t")+"\nPosición: "+d.get("p")+"\nEmail: "+d.get("m")+"\nContacto preferido: "+d.get("c")+"\n\n"+d.get("g");
+location.href="mailto:standoperospr@gmail.com?subject="+encodeURIComponent(d.get("s"))+"&body="+encodeURIComponent(b)});
+</script>
+</body>
+</html>

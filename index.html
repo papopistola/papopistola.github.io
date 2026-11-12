@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tour Dates Test Site</title>
+<style>
+  body { margin: 0; font-family: sans-serif; background: #fff; color: #111; }
+  header { background: #000; color: #fff; padding: 24px 20px; text-align: center; }
+  header h1 { margin: 0; font-size: 1.6rem; }
+  main { padding: 32px 20px 64px; }
+  h2 { text-align: center; margin: 0 0 24px; }
+  footer { text-align: center; color: #777; font-size: .85rem; padding: 20px; border-top: 1px solid #eee; }
+</style>
+</head>
+<body>
+
+<header><h1>Test Site</h1></header>
+
+<main>
+  <h2>Tour Dates</h2>
+
+  <!-- ===== START: paste-in widget ===== -->
+
+  <div class="tour-widget">
+    <div class="view-toggle" id="tour-toggle" hidden>
+      <button type="button" data-view="list" aria-pressed="false" aria-label="List view" title="List view"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1" fill="currentColor"/><circle cx="3.5" cy="12" r="1" fill="currentColor"/><circle cx="3.5" cy="18" r="1" fill="currentColor"/></svg></button>
+      <button type="button" data-view="carousel" aria-pressed="true" aria-label="Carousel view" title="Carousel view"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="7" y="5" width="10" height="14" rx="2"/><path d="M3 8v8M21 8v8"/></svg></button>
+    </div>
+    <div id="tour-dates-container">Loading upcoming tour dates...</div>
+  </div>
+
+  <!-- Image pop-up -->
+  <div id="tour-lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged image" hidden>
+    <button type="button" class="lightbox-close" aria-label="Close">&times;</button>
+    <img class="lightbox-img" alt="">
+  </div>
+
+  <style>
+    .tour-widget { font-family: sans-serif; max-width: 800px; margin: 0 auto; }
+
+    /* View toggle */
+    .view-toggle { display: flex; justify-content: center; gap: 0; margin-bottom: 20px; }
+    .view-toggle[hidden] { display: none; }
+    .view-toggle button { display: flex; align-items: center; justify-content: center; padding: 8px 16px; cursor: pointer; background: #fff; color: #000; border: 2px solid #000; }
+    .view-toggle button:first-child { border-radius: 6px 0 0 6px; }
+    .view-toggle button:last-child { border-radius: 0 6px 6px 0; border-left: 0; }
+    .view-toggle button[aria-pressed="true"] { background: #000; color: #fff; }
+
+    /* Shared pieces */
+    .date-box { width: 100%; min-height: 80px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px; border: 2px solid #000; border-radius: 14px; font-weight: bold; font-size: 1em; line-height: 1.2; overflow-wrap: anywhere; }
+    .poster-img { display: block; object-fit: cover; border-radius: 8px; background-color: #f0f0f0; }
+    .tour-show { font-weight: bold; font-size: 1.1em; }
+    .tour-location { color: #555; margin-top: 4px; }
+    .ticket-btn { background-color: #000; color: #fff; padding: 10px 20px; text-decoration: none; text-transform: uppercase; font-weight: bold; font-size: 0.9em; border-radius: 4px; text-align: center; }
+    .ticket-btn:hover { background-color: #444; }
+    .ticket-spacer { width: 100px; }
+
+    /* List view */
+    .tour-dates-grid { display: flex; flex-direction: column; gap: 20px; }
+    .tour-row { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ccc; padding: 15px 0; gap: 20px; }
+    .tour-visual { flex: 0 0 140px; width: 140px; }
+    .tour-info { flex-grow: 1; min-width: 0; }
+    @media (max-width: 560px) {
+      .tour-row { flex-wrap: wrap; }
+      .tour-info { flex-basis: 100%; order: 3; }
+      .tour-row .ticket-btn, .tour-row .ticket-spacer { order: 4; }
+    }
+
+    /* Image pop-up */
+    .lightbox { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(0,0,0,.85); }
+    .lightbox[hidden] { display: none; }
+    .lightbox-img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
+    .lightbox-close { position: absolute; top: 14px; right: 18px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: #fff; color: #000; font-size: 1.8rem; line-height: 1; cursor: pointer; }
+
+    /* Carousel view */
+    .carousel { position: relative; }
+    .car-track { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; padding: 4px 2px 12px; scrollbar-width: thin; }
+    .tour-card { flex: 0 0 220px; scroll-snap-align: start; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px solid #ccc; border-radius: 12px; background: #fff; }
+    .tour-card .poster-img { width: 100%; height: 260px; }
+    .tour-card .poster-img.zoomable { cursor: zoom-in; }
+    .tour-card .tour-info { flex-grow: 1; }
+    .tour-card .ticket-btn { margin-top: auto; }
+    .car-btn { position: absolute; top: 120px; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #000; color: #fff; font-size: 1.4rem; line-height: 1; cursor: pointer; opacity: .85; z-index: 2; }
+    .car-btn:hover { opacity: 1; }
+    .car-btn.prev { left: -8px; }
+    .car-btn.next { right: -8px; }
+  </style>
+
+  <script>
+    const SPREADSHEET_ID = '1V5YNdBn7CiriwUIamR57OBRN1QiEdhA7l8iFIH0bkfI';
+    const GID = '0';
+
+    // Which view shows first: 'list' or 'carousel'
+    const DEFAULT_VIEW = 'carousel';
+
+    // Published CSV link (File > Share > Publish to web > CSV)
+    const PUBLISHED_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8u6OtojKkyHxTVR18zFMEBt5SVwpxNq7vRspENH2pRWUDIm9CkDLgBy4Uki5IzOLNzbJ7XKjrOOft/pub?output=csv';
+
+    const PLACEHOLDER_IMG =
+      "data:image/svg+xml;utf8," +
+      encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="60" height="80"><rect width="60" height="80" fill="#e5e5e5"/></svg>');
+
+    const container = document.getElementById('tour-dates-container');
+    const toggle = document.getElementById('tour-toggle');
+    let loaded = false;
+    let items = [];
+    let currentView = DEFAULT_VIEW;
+
+    function escapeHTML(str) {
+      return String(str == null ? '' : str).replace(/[&<>"']/g, c => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+      ));
+    }
+
+    // Pieces used by both views
+    function parts(it) {
+      return {
+        img: `<img src="${it.img}" class="poster-img${it.img === PLACEHOLDER_IMG ? '' : ' zoomable'}" alt="${escapeHTML(it.show) || 'Show image'}">`,
+        date: `<div class="date-box">${escapeHTML(it.date)}</div>`,
+        show: it.show ? `<div class="tour-show">${escapeHTML(it.show)}</div>` : '',
+        where: `<div class="tour-location">${escapeHTML(it.venue)}${it.venue && it.location ? ' - ' : ''}${escapeHTML(it.location)}</div>`,
+        btn: it.hasTickets
+          ? `<a href="${escapeHTML(it.ticketLink)}" target="_blank" rel="noopener" class="ticket-btn">Boletos</a>`
+          : ''
+      };
+    }
+
+    function listRow(it) {
+      const p = parts(it);
+      return `
+        <div class="tour-row">
+          <div class="tour-visual">${p.date}</div>
+          <div class="tour-info">${p.show}${p.where}</div>
+          ${p.btn || '<div class="ticket-spacer"></div>'}
+        </div>`;
+    }
+
+    function carouselCard(it) {
+      const p = parts(it);
+      return `
+        <div class="tour-card">
+          ${p.img}${p.date}
+          <div class="tour-info">${p.show}${p.where}</div>
+          ${p.btn}
+        </div>`;
+    }
+
+    function draw() {
+      toggle.querySelectorAll('button').forEach(b =>
+        b.setAttribute('aria-pressed', String(b.dataset.view === currentView)));
+
+      if (!items.length) { container.textContent = 'No upcoming tour dates.'; return; }
+
+      if (currentView === 'carousel') {
+        container.innerHTML = `
+          <div class="carousel">
+            <button type="button" class="car-btn prev" aria-label="Previous">&#8249;</button>
+            <div class="car-track">${items.map(carouselCard).join('')}</div>
+            <button type="button" class="car-btn next" aria-label="Next">&#8250;</button>
+          </div>`;
+        const track = container.querySelector('.car-track');
+        const step = () => Math.max(track.clientWidth * 0.8, 200);
+        container.querySelector('.prev').onclick = () => track.scrollBy({ left: -step() });
+        container.querySelector('.next').onclick = () => track.scrollBy({ left: step() });
+      } else {
+        container.innerHTML = `<div class="tour-dates-grid">${items.map(listRow).join('')}</div>`;
+      }
+    }
+
+    toggle.addEventListener('click', e => {
+      const b = e.target.closest('button[data-view]');
+      if (!b) return;
+      currentView = b.dataset.view;
+      draw();
+    });
+
+    // Image pop-up
+    const lightbox = document.getElementById('tour-lightbox');
+    const lightboxImg = lightbox.querySelector('.lightbox-img');
+    let lastFocus = null;
+
+    function openLightbox(img) {
+      lastFocus = document.activeElement;
+      lightboxImg.src = img.src;
+      lightboxImg.alt = img.alt;
+      lightbox.hidden = false;
+      lightbox.querySelector('.lightbox-close').focus();
+    }
+    function closeLightbox() {
+      lightbox.hidden = true;
+      lightboxImg.removeAttribute('src');
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
+    container.addEventListener('click', e => {
+      const img = e.target.closest('.tour-card .poster-img.zoomable');
+      if (img) openLightbox(img);
+    });
+    lightbox.addEventListener('click', e => {
+      if (e.target !== lightboxImg) closeLightbox(); // click backdrop or X
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !lightbox.hidden) closeLightbox();
+    });
+
+    // rows = array of [date, show, location, venue, ticketLink, posterUrl] (columns A-F, all strings)
+    function renderRows(rows) {
+      loaded = true;
+      items = [];
+      rows.forEach(([date, show, location, venue, ticketLink, posterUrl]) => {
+        date = (date || '').trim(); show = (show || '').trim(); location = (location || '').trim(); venue = (venue || '').trim();
+        ticketLink = (ticketLink || '').trim(); posterUrl = (posterUrl || '').trim();
+
+        // Skip only completely empty rows
+        if (!date && !show && !location && !venue && !ticketLink && !posterUrl) return;
+
+        items.push({
+          date, show, location, venue, ticketLink,
+          hasTickets: ticketLink.startsWith('http'),
+          img: posterUrl.startsWith('http') ? escapeHTML(posterUrl) : PLACEHOLDER_IMG
+        });
+      });
+      toggle.hidden = !items.length;
+      draw();
+    }
+
+    function fail(msg) {
+      container.innerText = msg || 'Failed to load tour dates.';
+    }
+
+    /* ---------- Published CSV (shows every word in the date column) ---------- */
+    function parseCSV(text) {
+      const out = [];
+      let row = [], cell = '', inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (inQuotes) {
+          if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+          else if (c === '"') inQuotes = false;
+          else cell += c;
+        } else if (c === '"') inQuotes = true;
+        else if (c === ',') { row.push(cell); cell = ''; }
+        else if (c === '\n' || c === '\r') {
+          if (c === '\r' && text[i + 1] === '\n') i++;
+          row.push(cell); out.push(row); row = []; cell = '';
+        } else cell += c;
+      }
+      if (cell !== '' || row.length) { row.push(cell); out.push(row); }
+      return out;
+    }
+
+    /* ---------- Fallback loader (Google may blank out words in a date column) ---------- */
+    function handleSheetData(response) {
+      if (!response || response.status !== 'ok') return fail();
+      const cellText = c => (c ? (c.f != null ? c.f : (c.v != null ? c.v : '')) : '').toString();
+      renderRows(response.table.rows.map(r => {
+        const c = r.c || [];
+        return [0, 1, 2, 3, 4, 5].map(i => cellText(c[i]));
+      }));
+    }
+
+    function loadViaScript() {
+      const s = document.createElement('script');
+      s.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?gid=${GID}&headers=1&tqx=responseHandler:handleSheetData`;
+      s.onerror = () => fail();
+      document.body.appendChild(s);
+      setTimeout(() => {
+        if (!loaded) fail('Failed to load tour dates. Make sure the sheet is shared as "Anyone with the link can view".');
+      }, 8000);
+    }
+
+    if (PUBLISHED_CSV_URL) {
+      fetch(PUBLISHED_CSV_URL)
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+        .then(text => renderRows(parseCSV(text).slice(1))) // slice(1) skips the header row
+        .catch(err => {
+          console.warn('CSV blocked or failed, using fallback loader:', err);
+          loadViaScript();
+        });
+    } else {
+      loadViaScript();
+    }
+  </script>
+
+  <!-- ===== END: paste-in widget ===== -->
+</main>
+
+<footer>Test page for the Google Sheets tour dates widget</footer>
+
+</body>
+</html>

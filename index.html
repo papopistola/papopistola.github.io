@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Episodios — Dulce Compañía con Angel Gonzalez</title>
+<style>
+  :root { --bg:#14121a; --card:#1f1b29; --text:#f3f0f8; --muted:#a9a2b8; --accent:#ff8a3d; --accent-text:#1a1206; --radius:14px; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  header { padding:28px 16px 8px; text-align:center; }
+  header h1 { margin:0 0 6px; font-size:clamp(1.6rem,4vw,2.4rem); }
+  header p { margin:0; color:var(--muted); }
+  main { max-width:1100px; margin:0 auto; padding:24px 16px 64px; }
+
+  /* Grid: 3 columns on desktop, 1 on mobile; rows are added automatically */
+  #episodes { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin:0; padding:0; list-style:none; }
+  @media (max-width:640px) { #episodes { grid-template-columns:1fr; } }
+
+  .card { background:var(--card); border-radius:var(--radius); overflow:hidden; animation:in .35s ease both; }
+  @keyframes in { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  .thumb { position:relative; display:block; width:100%; aspect-ratio:1/1; padding:0; border:0; background:#000; cursor:pointer; overflow:hidden; }
+  .thumb img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .3s, opacity .3s; }
+  .thumb:hover img, .thumb:focus-visible img { transform:scale(1.05); opacity:.8; }
+  .thumb:focus-visible { outline:3px solid var(--accent); outline-offset:-3px; }
+  .play { position:absolute; inset:0; margin:auto; width:64px; height:64px; border-radius:50%; background:rgba(0,0,0,.6); display:grid; place-items:center; opacity:0; transition:opacity .2s; pointer-events:none; }
+  .thumb:hover .play, .thumb:focus-visible .play { opacity:1; }
+  .play svg { width:28px; height:28px; fill:#fff; margin-left:3px; }
+  @media (hover:none) { .play { opacity:1; width:52px; height:52px; } }
+  .card-body { padding:12px 14px 16px; }
+  .card-title { margin:0 0 4px; font-size:1rem; line-height:1.3; font-weight:600; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .card-date { margin:0; font-size:.8rem; color:var(--muted); }
+  .skel { aspect-ratio:1/1.25; border-radius:var(--radius); background:linear-gradient(90deg,#1f1b29 25%,#2a2538 50%,#1f1b29 75%); background-size:200% 100%; animation:shimmer 1.2s infinite; }
+  @keyframes shimmer { to { background-position:-200% 0; } }
+
+  /* Buttons */
+  .actions { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:12px; margin-top:28px; }
+  .btn { font:inherit; font-weight:600; padding:12px 28px; border-radius:999px; cursor:pointer; border:2px solid var(--accent); background:var(--accent); color:var(--accent-text); transition:transform .15s, background .15s; }
+  .btn:hover { transform:translateY(-1px); }
+  .btn:focus-visible { outline:3px solid #fff; outline-offset:2px; }
+  .btn.ghost { background:transparent; color:var(--accent); }
+  .btn.ghost:hover { background:rgba(255,138,61,.12); }
+  [hidden] { display:none !important; }
+  .note { text-align:center; color:var(--muted); font-size:.85rem; margin:18px 0 0; }
+
+  /* Pop-up */
+  #modal { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(0,0,0,.78); animation:fade .2s both; }
+  @keyframes fade { from { opacity:0; } to { opacity:1; } }
+  .dialog { position:relative; display:grid; grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); gap:24px; width:min(1050px,100%); max-height:100%; overflow:auto; padding:28px; background:var(--card); border-radius:18px; box-shadow:0 24px 80px rgba(0,0,0,.6); }
+  .video { position:relative; aspect-ratio:16/9; background:#000; border-radius:10px; overflow:hidden; align-self:start; }
+  .video iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .info { display:flex; flex-direction:column; gap:14px; min-width:0; }
+  .info h3 { margin:0; font-size:1.35rem; line-height:1.25; padding-right:28px; }
+  .info p { margin:0; color:var(--muted); line-height:1.5; }
+  .links { display:flex; flex-direction:column; gap:10px; margin-top:4px; }
+  .link { display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:10px; text-decoration:none; font-weight:600; color:#fff; transition:filter .15s, transform .15s; }
+  .link:hover { filter:brightness(1.12); transform:translateY(-1px); }
+  .link svg { width:22px; height:22px; fill:currentColor; flex:none; }
+  .link.spotify { background:#1db954; color:#04210d; }
+  .link.apple { background:#9b4dff; }
+  .link.yt { background:#2a2538; border:1px solid #3a3450; }
+  .vnote { font-size:.8rem; color:var(--muted); }
+  #close { position:absolute; top:10px; right:12px; width:38px; height:38px; border-radius:50%; border:0; cursor:pointer; font-size:1.5rem; line-height:1; background:rgba(255,255,255,.1); color:#fff; }
+  #close:hover { background:rgba(255,255,255,.2); }
+  #close:focus-visible { outline:3px solid var(--accent); }
+  @media (max-width:820px) { .dialog { grid-template-columns:1fr; padding:56px 16px 20px; gap:18px; } .info h3 { font-size:1.15rem; padding-right:0; } }
+  body.lock { overflow:hidden; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Dulce Compañía con Angel Gonzalez</h1>
+  <p>Todos los episodios</p>
+</header>
+
+<main>
+  <ul id="episodes" aria-live="polite">
+    <li class="skel"></li><li class="skel"></li><li class="skel"></li>
+  </ul>
+
+  <div class="actions" id="actions" hidden>
+    <button type="button" class="btn" id="btn-more">Ver Más</button>
+    <button type="button" class="btn ghost" id="btn-all">Ver Todos</button>
+  </div>
+  <p class="note" id="note" hidden></p>
+</main>
+
+<div id="modal" role="dialog" aria-modal="true" aria-labelledby="m-title" hidden>
+  <div class="dialog">
+    <button type="button" id="close" aria-label="Cerrar">×</button>
+    <div class="video" id="m-video"></div>
+    <div class="info">
+      <h3 id="m-title"></h3>
+      <p id="m-desc"></p>
+      <div class="links">
+        <a class="link spotify" id="m-spotify" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm4.6 14.4a.62.62 0 01-.86.2c-2.35-1.44-5.3-1.76-8.78-.97a.62.62 0 11-.28-1.2c3.8-.87 7.07-.5 9.72 1.12.3.18.4.57.2.85zm1.23-2.74a.78.78 0 01-1.07.26c-2.69-1.65-6.79-2.13-9.97-1.16a.78.78 0 11-.45-1.5c3.63-1.1 8.15-.57 11.23 1.33.37.22.48.7.26 1.07zm.1-2.85C14.7 8.9 9.4 8.73 6.33 9.66a.93.93 0 11-.54-1.78c3.52-1.07 9.38-.86 13.08 1.34a.93.93 0 01-.95 1.6z"/></svg>
+          Escuchar en Spotify
+        </a>
+        <a class="link apple" id="m-apple" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9.5" r="2.2"/><path d="M12 13.2c-1.3 0-2.2.9-2.2 2.1l.5 4.3c.1.8.8 1.4 1.7 1.4s1.6-.6 1.7-1.4l.5-4.3c0-1.2-.9-2.1-2.2-2.1z"/><path d="M12 3.5a6.1 6.1 0 00-3.3 11.2l.9-1.3A4.6 4.6 0 1116.4 9a4.6 4.6 0 01-2.1 3.9l.9 1.3A6.1 6.1 0 0012 3.5z"/></svg>
+          Escuchar en Apple Podcasts
+        </a>
+        <a class="link yt" id="m-yt" target="_blank" rel="noopener noreferrer" hidden>Ver en YouTube</a>
+      </div>
+      <p class="vnote" id="m-vnote" hidden></p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ================= CONFIG ================= */
+  var RSS_URL = 'https://audioboom.com/channels/4056568.rss';
+  var SPOTIFY_URL = 'https://open.spotify.com/show/6DOIqnx3HCENvy5sRQkYA0?si=0bc960871c874442';
+  var APPLE_URL = 'https://podcasts.apple.com/us/podcast/dulce-compa%C3%B1%C3%ADa-con-angel-gonzalez/id943693249';
+  var YT_CHANNEL_ID = 'UC10hhsvyxH6eeXLh4yMEm8w';          // @DulcePodcast
+  var YT_API_KEY = '';  // OPTIONAL: YouTube Data API key → reads the channel's FULL video list (otherwise only the 15 newest)
+  var FALLBACK_IMAGE = 'https://audioboom.com/i/43137101/600';
+  var FIRST_DESKTOP = 9, FIRST_MOBILE = 3, STEP = 9;
+  var MOBILE_QUERY = '(max-width: 640px)';
+  // Public CORS relays, used only if the browser can't read a feed directly.
+  // On a real site, replace these with your own server-side proxy.
+  var PROXIES = [
+    function (u) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); },
+    function (u) { return 'https://corsproxy.io/?url=' + encodeURIComponent(u); }
+  ];
+
+  /* ============ Offline sample (50 newest episodes) — used only if the live feed fails ============ */
+  function om(d) { return 'Open Mic | ' + d; }
+  var SAMPLE = [
+    [386,'Julio y Kiwi corrieron el Open Mic','Julio y Kiwi cuenta sus experiencias siendo hosts del open mic y un poco sobre GTA VI.','2026-11-23',8980076],
+    [385,om('Noviembre 2, 2026'),'Se hace un anuncio importante.','2026-11-16',8977230],
+    [384,om('Octubre 26, 2026'),'¡Noche de terror!','2026-11-09',8977225],
+    [383,om('Octubre 19, 2026'),'Un show de duración razonable.','2026-11-02',8972006],
+    [382,om('Octubre 12, 2026'),'¡Se acerca Halloween!','2026-10-26',8968633],
+    [381,om('Octubre 5, 2026'),'¡Celebramos 4 años del Open Mic!','2026-10-19',8966291],
+    [380,om('Septiembre 28, 2026'),'Una noche arisca.','2026-10-12',8963114],
+    [379,'Primetime en 7eight7 feat. Kriss du Cecille','Kriss du Cecille nos acompaña para aprender sobre el farmeo de aura y ser juez de una batalla de rap contra Jesus.','2026-10-08',8962355],
+    [378,om('Septiembre 21, 2026'),'Noche de imitación y divorcio.','2026-10-05',8960280],
+    [377,'La Comedia en Puerto Rico Está Cambiando','Una conversación sobre stand up en Puerto Rico, Jim Carrey, chistes escritos con IA y lo que significa vivir del entretenimiento.','2026-10-01',8959067],
+    [376,om('Septiembre 14, 2026'),'¡Una noche sorpresivamente intensa!','2026-09-28',8957718],
+    [375,om('Septiembre 7, 2026'),'Los comediantes ayudan con las entrevistas.','2026-09-21',8954560],
+    [374,om('Agosto 31, 2026'),'Este show necesitaba súbtitulos.','2026-09-14',8949721],
+    [373,om('Agosto 24, 2026'),'Tuvimos que censurar ciertas cosas de este show.','2026-09-07',8945577],
+    [372,om('Agosto 17, 2026'),'Se acerca el fin de verano.','2026-08-31',8942793],
+    [371,om('Agosto 10, 2026'),'Aprendemos lecciones de vida.','2026-08-24',8944410],
+    [370,om('Agosto 3, 2026'),'Por poco nos sofocamos con una de las presentaciones.','2026-08-17',8937822],
+    [369,om('Julio 27, 2026'),'Comediantes con intenciones cuestionables.','2026-08-10',8937821],
+    [368,om('Julio 20, 2026'),'Vemos gente brillar mientras otros se unden.','2026-08-04',8934102],
+    [367,om('Julio 13, 2026'),'Vikingo presenta su físico transformado.','2026-07-27',8934101],
+    [366,om('Julio 6, 2026'),'Sentimos el calor de verano.','2026-07-20',8930066],
+    [365,om('Junio 29, 2026'),'Un manantial de talento diverso.','2026-07-13',8926777],
+    [364,om('Junio 22, 2026'),'Lleamos nuestra sanidad a sus límites.','2026-07-06',8921728],
+    [363,om('Junio 15, 2026'),'El show no aguanta tanto talento.','2026-06-29',8921727],
+    [362,om('Junio 8, 2026'),'Le pichamos al juego de los Knicks para hacer stand up.','2026-06-22',8919260],
+    [361,om('Junio 1, 2026'),'¡Celebramos 1 año de Dulce Compañía en El Ocho!','2026-06-15',8913312],
+    [360,om('Mayo 25, 2026'),'La antesala a nuestro primer aniverario en El Ocho.','2026-06-08',8913162],
+    [359,om('Mayo 18, 2026'),'Viendo todo en un ángulo distinto.','2026-06-01',8910262],
+    [358,om('Mayo 11, 2026'),'Comedia de primavera.','2026-05-25',8907492],
+    [357,om('Mayo 4, 2026'),'La fuerza nos acompañó.','2026-05-18',8904615],
+    [356,om('Abril 27, 2026'),'El caos perdura.','2026-05-11',8901697],
+    [355,'Talent Show | Abril 20, 2026','¡Celebramos 4/20 con nuestro primer Talent Show!','2026-05-04',8895805],
+    [354,om('Abril 13, 2026'),'Calentando motores para el Talent Show.','2026-04-27',8895649],
+    [353,om('Abril 6, 2026'),'Sentimos la energía.','2026-04-20',8891815],
+    [352,om('Marzo 30, 2026'),'Un circo en Semana Santa.','2026-04-13',8883161],
+    [351,om('Marzo 23, 2026'),'¡Ni la lluvia ni las luces nos detienen!','2026-04-06',8878834],
+    [350,om('Marzo 16, 2026'),'¡Llegamos a los 1000 suscriptores!','2026-03-30',8878485],
+    [349,om('Marzo 9, 2026'),'Conversaciones casuales sobre la reencarnación.','2026-03-23',8877377],
+    [348,om('Marzo 2, 2026'),'Se establecen nuevas reglas.','2026-03-16',8874355],
+    [347,om('Febrero 23, 2026'),'¡Caras nuevas y cumpleañeras!','2026-03-09',8865687],
+    [346,om('Febrero 16, 2026'),'Celebramos la vida, el amor y la amistad.','2026-03-02',8863889],
+    [345,om('Febrero 9, 2026'),'Reflexionamos sobre el Benito Bowl.','2026-02-23',8863319],
+    [344,om('Febrero 2, 2026'),'La salud mental sige decayendo.','2026-02-16',8861679],
+    [343,om('Enero 26, 2026'),'La escenografía recibe un upgrade.','2026-02-09',8858768],
+    [342,om('Enero 19, 2026'),'Una noche con nebuleo intenso.','2026-02-02',8855589],
+    [341,om('Enero 12, 2026'),'Caras nuevas se juntan con los veteranos.','2026-01-26',8844998],
+    [340,om('Enero 5, 2026'),'Celebramos víspera de Reyes con nuestro primer open mic del año.','2026-01-19',8844997],
+    [339,om('Diciembre 29, 2025'),'¡Despedimos el año en el primer piso de El Ocho!','2026-01-12',8827961],
+    [338,om('Diciembre 22, 2025'),'¡Tenemos nuestro primer intercambio de regalos!','2026-01-05',8826058],
+    [337,'Open Mic en La Mordida | Diciembre 14, 2025','Presentamos el Open Mic por primera vez en La Mordida Taquería Mexicana (Caguas).','2025-12-31',8824841]
+  ];
+  function slugify(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+  function sampleEpisodes() {
+    return SAMPLE.map(function (r) {
+      return { num: r[0], title: r[0] + ': ' + r[1], bareTitle: r[1], summary: r[2],
+               date: new Date(r[3] + 'T12:00:00'), image: FALLBACK_IMAGE,
+               link: 'https://audioboom.com/posts/' + r[4] + '-' + slugify(r[1]) };
+    });
+  }
+
+  /* ================= Network ================= */
+  function plainFetch(url) {
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var t = ctrl && setTimeout(function () { ctrl.abort(); }, 9000);
+    return fetch(url, ctrl ? { signal: ctrl.signal } : undefined).then(function (r) {
+      if (t) clearTimeout(t);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    });
+  }
+  function fetchText(url) {
+    var tries = [function () { return plainFetch(url); }];
+    PROXIES.forEach(function (p) { tries.push(function () { return plainFetch(p(url)); }); });
+    return tries.reduce(function (chain, t) { return chain.catch(t); }, Promise.reject());
+  }
+  function parseXml(text) {
+    var d = new DOMParser().parseFromString(text, 'text/xml');
+    if (d.querySelector('parsererror')) throw new Error('Bad XML');
+    return d;
+  }
+  function htmlToText(h) { return (new DOMParser().parseFromString(h || '', 'text/html').body.textContent || '').trim(); }
+  function firstLine(text) {
+    var line = (text || '').replace(/\r/g, '').trim().split('\n')[0] || '';
+    var cut = line.search(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]|https?:\/\//u);
+    if (cut >= 0) line = line.slice(0, cut);
+    return line.trim();
+  }
+  function stripNum(t) { return t.replace(/^\s*\d+\s*[:.\-]\s*/, ''); }
+
+  function loadEpisodes() {
+    return fetchText(RSS_URL).then(function (text) {
+      var doc = parseXml(text);
+      var ci = doc.getElementsByTagName('itunes:image')[0];
+      var chanImg = ci ? ci.getAttribute('href') : '';
+      var items = Array.prototype.slice.call(doc.getElementsByTagName('item'));
+      if (!items.length) throw new Error('Empty feed');
+      return items.map(function (it) {
+        function tag(n) { var e = it.getElementsByTagName(n)[0]; return e ? e.textContent : ''; }
+        var img = it.getElementsByTagName('itunes:image')[0];
+        var title = htmlToText(tag('title'));
+        var m = title.match(/^\s*(\d+)\s*[:.\-]/);
+        return { num: m ? +m[1] : null, title: title, bareTitle: stripNum(title),
+                 summary: firstLine(htmlToText(tag('description') || tag('itunes:summary'))),
+                 date: tag('pubDate') ? new Date(tag('pubDate')) : null,
+                 image: (img && img.getAttribute('href')) || chanImg || FALLBACK_IMAGE,
+                 link: tag('link') };
+      });
+    });
+  }
+
+  /* ---- YouTube videos from @DulcePodcast ---- */
+  var UPLOADS_ID = 'UU' + YT_CHANNEL_ID.slice(2);
+  function loadVideos() {
+    return (YT_API_KEY ? videosApi().catch(videosFeed) : videosFeed());
+  }
+  function videosFeed() {
+    return fetchText('https://www.youtube.com/feeds/videos.xml?channel_id=' + YT_CHANNEL_ID).then(function (text) {
+      return Array.prototype.slice.call(parseXml(text).getElementsByTagName('entry')).map(function (e) {
+        var pub = e.getElementsByTagName('published')[0];
+        return { id: (e.getElementsByTagName('yt:videoId')[0] || {}).textContent,
+                 title: (e.getElementsByTagName('title')[0] || {}).textContent || '',
+                 published: pub ? new Date(pub.textContent) : null };
+      }).filter(function (v) { return v.id; });
+    });
+  }
+  function videosApi() {
+    var out = [];
+    function page(token) {
+      var u = 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=' + UPLOADS_ID +
+              '&key=' + encodeURIComponent(YT_API_KEY) + (token ? '&pageToken=' + token : '');
+      return fetch(u).then(function (r) { if (!r.ok) throw new Error('YT API'); return r.json(); }).then(function (j) {
+        (j.items || []).forEach(function (i) {
+          var s = i.snippet;
+          if (s && s.resourceId && s.title !== 'Private video' && s.title !== 'Deleted video')
+            out.push({ id: s.resourceId.videoId, title: s.title, published: s.publishedAt ? new Date(s.publishedAt) : null });
+        });
+        return j.nextPageToken ? page(j.nextPageToken) : out;
+      });
+    }
+    return page('');
+  }
+
+  /* ---- Matching videos to episodes: by date + title ---- */
+  var MONTHS = { enero:1,febrero:2,marzo:3,abril:4,mayo:5,junio:6,julio:7,agosto:8,septiembre:9,setiembre:9,octubre:10,noviembre:11,diciembre:12 };
+  function norm(s) { return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
+  function dateKey(s) {
+    var m = norm(s).match(/(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre) (\d{1,2}) (\d{4})/);
+    return m ? m[3] + '-' + MONTHS[m[1]] + '-' + parseInt(m[2], 10) : '';
+  }
+  function typeKey(s) {
+    s = norm(s);
+    if (s.indexOf('talent show') > -1) return 'talent';
+    if (s.indexOf('mordida') > -1) return 'mordida';
+    if (s.indexOf('open mic') > -1) return 'openmic';
+    return '';
+  }
+  function tokens(s) { return norm(s).split(' ').filter(function (w) { return w.length > 2; }); }
+  function jaccard(a, b) {
+    var A = {}, B = {}, inter = 0;
+    a.forEach(function (w) { A[w] = 1; }); b.forEach(function (w) { B[w] = 1; });
+    var ka = Object.keys(A), kb = Object.keys(B);
+    ka.forEach(function (w) { if (B[w]) inter++; });
+    var u = ka.length + kb.length - inter;
+    return u ? inter / u : 0;
+  }
+  function findVideo(ep, videos) {
+    if (!videos.length) return null;
+    var dk = dateKey(ep.bareTitle), tk = typeKey(ep.bareTitle), i, v;
+    // 1) same date written in the title (e.g. "Octubre 26, 2026") and same show type
+    if (dk) for (i = 0; i < videos.length; i++) {
+      v = videos[i];
+      if (dateKey(v.title) === dk && typeKey(v.title) === tk) return v;
+    }
+    // 2) episode number in the video title (#386, Ep. 386, Episodio 386)
+    if (ep.num) for (i = 0; i < videos.length; i++) {
+      var m = videos[i].title.match(/(?:#|ep\.?\s*|episodio\s*)(\d{2,3})\b/i);
+      if (m && +m[1] === ep.num) return videos[i];
+    }
+    // 3) closest title; if the dates are known, the upload must be within 10 days of the episode
+    var et = tokens(ep.bareTitle), best = null, bs = 0;
+    for (i = 0; i < videos.length; i++) {
+      v = videos[i];
+      if (ep.date && v.published && Math.abs(v.published - ep.date) > 10 * 864e5 && !dk) continue;
+      var sc = jaccard(et, tokens(stripNum(v.title)));
+      if (sc > bs) { bs = sc; best = v; }
+    }
+    return bs >= 0.6 ? best : null;
+  }
+
+  /* ================= Page logic ================= */
+  var $ = function (id) { return document.getElementById(id); };
+  var grid = $('episodes'), actions = $('actions'), btnMore = $('btn-more'), btnAll = $('btn-all'), note = $('note');
+  var modal = $('modal'), mVideo = $('m-video');
+  var mq = window.matchMedia(MOBILE_QUERY);
+  var episodes = [], videos = [], rendered = 0, shown = 0, expanded = false, lastOpener = null;
+
+  function initial() { return mq.matches ? FIRST_MOBILE : FIRST_DESKTOP; }
+
+  function makeCard(ep) {
+    var li = document.createElement('li');
+    li.className = 'card';
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'thumb';
+    btn.setAttribute('aria-label', 'Ver episodio: ' + ep.title);
+    var img = document.createElement('img');
+    img.src = ep.image; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
+    img.onerror = function () { if (img.src !== FALLBACK_IMAGE) img.src = FALLBACK_IMAGE; };
+    var play = document.createElement('span');
+    play.className = 'play';
+    play.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+    btn.appendChild(img); btn.appendChild(play);
+    btn.addEventListener('click', function () { openModal(ep, btn); });
+    var body = document.createElement('div');
+    body.className = 'card-body';
+    var h = document.createElement('h3'); h.className = 'card-title'; h.textContent = ep.title;
+    body.appendChild(h);
+    if (ep.date && !isNaN(ep.date)) {
+      var p = document.createElement('p'); p.className = 'card-date';
+      p.textContent = ep.date.toLocaleDateString('es-PR', { year: 'numeric', month: 'long', day: 'numeric' });
+      body.appendChild(p);
+    }
+    li.appendChild(btn); li.appendChild(body);
+    return li;
+  }
+
+  function render() {
+    var target = Math.min(shown, episodes.length);
+    while (rendered < target) { grid.appendChild(makeCard(episodes[rendered])); rendered++; }
+    var remaining = episodes.length - rendered;
+    actions.hidden = remaining <= 0;
+  }
+
+  btnMore.addEventListener('click', function () { expanded = true; shown += STEP; render(); });
+  btnAll.addEventListener('click', function () { expanded = true; shown = episodes.length; render(); });
+  var onMq = function () { if (!expanded && episodes.length) { shown = initial(); render(); } };
+  if (mq.addEventListener) mq.addEventListener('change', onMq); else mq.addListener(onMq);
+
+  /* ---- Pop-up ---- */
+  function openModal(ep, opener) {
+    lastOpener = opener;
+    var v = findVideo(ep, videos);
+    var iframe = document.createElement('iframe');
+    iframe.title = ep.title;
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen';
+    iframe.allowFullscreen = true;
+    iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+    iframe.src = v ? 'https://www.youtube-nocookie.com/embed/' + v.id + '?autoplay=1&rel=0'
+                   : 'https://www.youtube-nocookie.com/embed/videoseries?list=' + UPLOADS_ID;
+    mVideo.innerHTML = '';
+    mVideo.appendChild(iframe);
+
+    $('m-title').textContent = ep.title;
+    $('m-desc').textContent = ep.summary || '';
+    $('m-desc').hidden = !ep.summary;
+    $('m-spotify').href = SPOTIFY_URL;
+    $('m-apple').href = APPLE_URL;
+    $('m-yt').hidden = $('m-vnote').hidden = !!v;
+    if (!v) {
+      $('m-yt').href = 'https://www.youtube.com/@DulcePodcast/videos';
+      $('m-vnote').textContent = 'No se encontró el video exacto de este episodio; se muestran los videos del canal.';
+    }
+    modal.hidden = false;
+    document.body.classList.add('lock');
+    $('close').focus();
+  }
+  function closeModal() {
+    if (modal.hidden) return;
+    modal.hidden = true;
+    mVideo.innerHTML = '';            // stops playback
+    document.body.classList.remove('lock');
+    if (lastOpener) lastOpener.focus();
+  }
+  $('close').addEventListener('click', closeModal);
+  modal.addEventListener('mousedown', function (e) { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', function (e) {
+    if (modal.hidden) return;
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Tab') {
+      var f = modal.querySelectorAll('button, a[href]:not([hidden]), iframe');
+      if (!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  /* ---- Start ---- */
+  loadVideos().then(function (v) { videos = v; }).catch(function (err) {
+    console.warn('No se pudieron cargar los videos de YouTube:', err);
+  });
+
+  loadEpisodes().catch(function (err) {
+    console.warn('Feed en vivo no disponible; usando episodios de muestra:', err);
+    note.textContent = 'Mostrando los 50 episodios más recientes de muestra (no se pudo leer el feed en vivo).';
+    note.hidden = false;
+    return sampleEpisodes();
+  }).then(function (list) {
+    episodes = list;
+    grid.innerHTML = '';
+    shown = initial();
+    render();
+  });
+})();
+</script>
+</body>
+</html>

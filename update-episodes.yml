@@ -1,0 +1,53 @@
+name: Update episodes and deploy
+
+on:
+  schedule:
+    - cron: '0 12 * * *'      # every day at 12:00 UTC
+  push:
+    branches: [main]          # redeploy whenever you change the page
+  workflow_dispatch:           # run by hand from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      FTP_SERVER: ${{ secrets.FTP_SERVER }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build episodes.json
+        env:
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}
+        run: node build-episodes.js
+
+      # Keeps the GitHub copy (your test site) up to date
+      - name: Commit episodes.json if changed
+        run: |
+          git config user.name  "github-actions"
+          git config user.email "actions@github.com"
+          git add episodes.json
+          git diff --cached --quiet || (git commit -m "Update episodes.json" && git push)
+
+      # Uploads the site to Namecheap. Skipped automatically until you add the FTP secrets.
+      - name: Deploy to Namecheap (FTP)
+        if: ${{ env.FTP_SERVER != '' }}
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_DIR }}        # e.g. public_html/episodios/   (note the trailing slash)
+          # protocol: ftps                          # uncomment if your host requires FTPS
+          exclude: |
+            **/.git*
+            **/.git*/**
+            build-episodes.js
+            README.md
+            node_modules/**

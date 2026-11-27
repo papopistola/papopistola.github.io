@@ -1,0 +1,46 @@
+# Save as .github/workflows/deploy.yml
+# Requires: repo Settings > Pages > Source = "GitHub Actions"
+#           repo Settings > Secrets and variables > Actions > Variables > YT_API_KEY
+name: Deploy The Main Site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build site with the YouTube API key
+        env:
+          YT_API_KEY: ${{ vars.YT_API_KEY }}
+        run: |
+          test -n "$YT_API_KEY" || { echo "::error::Repository variable YT_API_KEY is not set"; exit 1; }
+          mkdir -p _site
+          rsync -a --exclude '.git' --exclude '.github' --exclude '_site' ./ _site/
+          sed -i "s|__YT_API_KEY__|${YT_API_KEY}|g" _site/index.html
+          grep -q "__YT_API_KEY__" _site/index.html && { echo "::error::Placeholder was not replaced"; exit 1; } || true
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
